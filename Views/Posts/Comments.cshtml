@@ -1,0 +1,18 @@
+﻿@model IEnumerable<TestWebApplication.Models.Comment>
+
+<div class="well">
+    @foreach (var item in Model)
+    {
+        <div class="comments__block">
+            <div class="comment__header">
+                <strong>@item.User.Name</strong>
+                <small>@item.PostDate</small>
+            </div>
+            <p><i>@item.Content</i></p>
+        </div>
+        <hr />
+    }
+</div>
+
+
+

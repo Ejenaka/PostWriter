@@ -62,3 +62,7 @@ textarea {
     height: 90px;
     resize: none;
 }
+
+.comment__header small {
+    float: right;
+}

@@ -17,8 +17,11 @@ namespace TestWebApplication.Models
         public int PostID { get; set; }
         public Post Post { get; set; }
 
+        [Required]
         [DataType(DataType.MultilineText)]
         public string Content { get; set; }
 
+        [DataType(DataType.DateTime)]
+        public DateTime PostDate { get; set; }
     }
 }

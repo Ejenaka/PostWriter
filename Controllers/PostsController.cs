@@ -11,14 +11,17 @@ namespace TestWebApplication.Controllers
         private readonly BlogDbContext db = new BlogDbContext();
         private const int POSTS_PER_PAGE = 10;
 
-        // GET: Posts
         public ActionResult Index(int page = 1)
         {
             if (page < 1)
                 return Index(page: 1);
 
             int pagesToSkip = (page - 1) * POSTS_PER_PAGE;
-            var posts = db.Posts.Include("User").ToList();
+            var posts = db.Posts
+                .Include(p => p.LikedUsers)
+                .Include(p => p.Comments)
+                .ToList();
+
             var postsOnPage = posts.OrderByDescending(p => p.PublicationDate).Skip(pagesToSkip).Take(POSTS_PER_PAGE).ToList();
             int pagesCount = posts.Count % 10 == 0 ? posts.Count / 10 : (posts.Count / 10) + 1;
             ViewData["PagesCount"] = pagesCount;
@@ -36,12 +39,33 @@ namespace TestWebApplication.Controllers
 
         public ActionResult Details(int id = 0)
         {
-            var post = db.Posts.Include(p => p.User).Include(p => p.LikedUsers).Where(p => p.ID == id).First();
+            var post = db.Posts
+                .Include(p => p.User)
+                .Include(p => p.LikedUsers)
+                .Include(p => p.Comments)
+                .Where(p => p.ID == id)
+                .First();
+
             if (post == null)
                 return new EmptyResult();
 
-            var turple = new Tuple<Post, Comment>(post, new Comment());
-            return View(turple);
+            post.Views++;
+
+            Comment comment = new Comment
+            {
+                PostID = id
+            };
+
+            PostComment postComment = new PostComment
+            {
+                Post = post,
+                Comment = comment
+            };
+
+            TempData["post"] = post;
+            db.SaveChanges();
+
+            return View(postComment);
         }
 
         [HttpPost]
@@ -53,7 +77,9 @@ namespace TestWebApplication.Controllers
 
             if (ModelState.IsValid)
             {
-                post.AuthorID = (int)Session["UserID"];
+                User currentUser = db.Users.Find((int)Session["UserID"]);
+                currentUser.BlogsCount++;
+                post.AuthorID = currentUser.ID;
                 post.PublicationDate = DateTime.Now;
 
                 db.Posts.Add(post);
@@ -101,21 +127,29 @@ namespace TestWebApplication.Controllers
         }
 
         [HttpPost]
-        public ActionResult AddComment(Comment comment)
+        public ActionResult AddComment(PostComment postComment)
         {
-            //TODO: Do logic for non-authorized users 
+            if (Session["UserID"] == null)
+                return RedirectToAction("Login", "Home");
+
             if (!ModelState.IsValid)
-                return RedirectToAction("Details", new { id = comment.PostID }); 
+                return RedirectToAction("Details", new { id = postComment.Post.ID });
 
             int currentUserID = (int)Session["UserID"];
-            User currentUser = db.Users.Where(u => u.ID == currentUserID).FirstOrDefault();
-            Post currentPost = db.Posts.Where(p => p.ID == comment.PostID).FirstOrDefault();
-            currentUser.Comments.Add(comment);
-            currentPost.Comments.Add(comment);
-            db.Comments.Add(comment);
+            int currentPostID = ((Post)TempData["post"]).ID;
+            User currentUser = db.Users.Where(u => u.ID == currentUserID).First();
+            Post currentPost = db.Posts.Where(p => p.ID == currentPostID).First();
+            currentUser.Comments.Add(postComment.Comment);
+            currentPost.Comments.Add(postComment.Comment);
+
+            postComment.Comment.PostDate = DateTime.Now;
+            postComment.Comment.UserID = currentUserID;
+            postComment.Comment.User = currentUser;
+
+            db.Comments.Add(postComment.Comment);
             db.SaveChanges();
 
-            return RedirectToAction("Details", new { id = comment.PostID });
+            return RedirectToAction("Details", new { id = postComment.Comment.PostID });
         }
     }
 }

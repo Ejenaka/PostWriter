@@ -30,8 +30,17 @@ namespace TestWebApplication.Controllers
         }
 
         [HttpPost]
-        public ActionResult Register([Bind(Include = "ID,Name,Password,RegistrationDate,BlogsCount")] User user)
+        public ActionResult Register(User user)
         {
+            if (db.Users.Where(u => u.Name == user.Name).Any())
+            {
+                ModelState.AddModelError("Name", "This user already exists");
+                return View(user);
+            }
+
+            if (user.Password.Length < 5)
+                ModelState.AddModelError("Password", "Password is too small");
+
             if (ModelState.IsValid)
             {
                 user.Password = Crypto.SHA256(user.Password);
@@ -52,38 +61,27 @@ namespace TestWebApplication.Controllers
         }
 
         [HttpPost]
-        public ActionResult Login([Bind(Include = "ID,Name,Password,RegistrationDate,BlogsCount")] User user)
+        public ActionResult Login(User user)
         {
+            var foundUser = db.Users.Where(u => u.Name == user.Name).FirstOrDefault();
+            if (foundUser == null)
+            {
+                ModelState.AddModelError("Name", "This user doesn't exist");
+                return View(user);
+            }
+
+            if (foundUser.Password != Crypto.SHA256(user.Password))
+                ModelState.AddModelError("Password", "Wrong password");
+
             if (ModelState.IsValid)
             {
-                var foundUser = db.Users.Where(u => u.Name == user.Name).First();
-                if (foundUser != null)
-                {
-                    if (foundUser.Password == Crypto.SHA256(user.Password))
-                    {
-                        Session["User"] = foundUser;
-                        Session["UserID"] = foundUser.ID;
-                        Session["Username"] = foundUser.Name;
-                        return RedirectToAction("Details", "Users", new {id = foundUser.ID});
-                    }
-                }
+                Session["User"] = foundUser;
+                Session["UserID"] = foundUser.ID;
+                Session["Username"] = foundUser.Name;
+                return RedirectToAction("Details", "Users", new {id = foundUser.ID});
             }
 
             return View(user);
-        }
-
-        public ActionResult About()
-        {
-            ViewBag.Message = "Your application description page.";
-            
-            return View();
-        }
-
-        public ActionResult Contact()
-        {
-            ViewBag.Message = "Your contact page.";
-
-            return View();
         }
     }
 }
