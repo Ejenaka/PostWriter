@@ -34,9 +34,9 @@ textarea {
 }
 
 .post__info {
-    width: 10%;
+    width: 80px;
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     height: 40px;
     margin-top: 10px;
 }
@@ -65,4 +65,8 @@ textarea {
 
 .comment__header small {
     float: right;
+}
+
+.posts__tabs {
+    margin: 30px 0px;
 }

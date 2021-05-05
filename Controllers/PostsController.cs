@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Web.Mvc;
 using System.Data.Entity;
+using System.Collections.Generic;
 using TestWebApplication.Models;
 
 namespace TestWebApplication.Controllers
@@ -16,17 +17,60 @@ namespace TestWebApplication.Controllers
             if (page < 1)
                 return Index(page: 1);
 
-            int pagesToSkip = (page - 1) * POSTS_PER_PAGE;
-            var posts = db.Posts
-                .Include(p => p.LikedUsers)
-                .Include(p => p.Comments)
-                .ToList();
+            var posts = GetPostsFromDB();
+            var postsOnPage = GetPostsOnPage(page, post => post.PublicationDate, posts);
+            ViewData["FilterAction"] = "Index";
 
-            var postsOnPage = posts.OrderByDescending(p => p.PublicationDate).Skip(pagesToSkip).Take(POSTS_PER_PAGE).ToList();
+            return View(postsOnPage);
+        }
+
+        public List<Post> GetPostsFromDB() => db.Posts.Include(p => p.LikedUsers).Include(p => p.Comments).ToList();
+
+        public List<Post> GetPostsOnPage(int page, Func<Post, object> keySelector, List<Post> posts)
+        {
+            int pagesToSkip = (page - 1) * POSTS_PER_PAGE;
+            var postsOnPage = posts.OrderByDescending(keySelector).Skip(pagesToSkip).Take(POSTS_PER_PAGE).ToList();
             int pagesCount = posts.Count % 10 == 0 ? posts.Count / 10 : (posts.Count / 10) + 1;
             ViewData["PagesCount"] = pagesCount;
 
-            return View(postsOnPage);
+            return postsOnPage;
+        }
+
+        public ActionResult MostLiked(int page = 1)
+        {
+            if (page < 1)
+                return Index(page: 1);
+
+            var posts = GetPostsFromDB();
+            var postsOnPage = GetPostsOnPage(page, post => post.Likes, posts);
+            ViewData["FilterAction"] = "MostLiked";
+
+            return View("Index", postsOnPage);
+        }
+
+        public ActionResult MostCommented(int page = 1)
+        {
+            if (page < 1)
+                return Index(page: 1);
+
+            var posts = GetPostsFromDB();
+            var postsOnPage = GetPostsOnPage(page, post => post.Comments.Count, posts);
+            ViewData["FilterAction"] = "MostCommented";
+
+            return View("Index", postsOnPage);
+        }
+
+        public ActionResult Search(string name, int page = 1)
+        {
+            if (string.IsNullOrEmpty(name))
+                return HttpNotFound();
+
+            var posts = GetPostsFromDB().Where(p => p.Title.ToLower().Contains(name.ToLower())).ToList();
+            var postsOnPage = GetPostsOnPage(page, post => post.PublicationDate, posts);
+            ViewData["FilterAction"] = "Search";
+            ViewData["SearchPostName"] = name;
+
+            return View("Index", postsOnPage);
         }
 
         public ActionResult Create()
@@ -39,10 +83,7 @@ namespace TestWebApplication.Controllers
 
         public ActionResult Details(int id = 0)
         {
-            var post = db.Posts
-                .Include(p => p.User)
-                .Include(p => p.LikedUsers)
-                .Include(p => p.Comments)
+            var post = GetPostsFromDB()
                 .Where(p => p.ID == id)
                 .First();
 
@@ -69,7 +110,6 @@ namespace TestWebApplication.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public ActionResult Create(Post post)
         {
             if (Session["UserID"] == null)
@@ -78,7 +118,6 @@ namespace TestWebApplication.Controllers
             if (ModelState.IsValid)
             {
                 User currentUser = db.Users.Find((int)Session["UserID"]);
-                currentUser.BlogsCount++;
                 post.AuthorID = currentUser.ID;
                 post.PublicationDate = DateTime.Now;
 
