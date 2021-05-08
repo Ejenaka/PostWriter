@@ -30,7 +30,6 @@ namespace TestWebApplication.Models
         public string Content { get; set; }
 
         public int Likes { get; set; }
-        public int Views { get; set; }
 
         [DataType(DataType.DateTime)]
         public DateTime PublicationDate { get; set; }

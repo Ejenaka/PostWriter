@@ -24,7 +24,7 @@ namespace TestWebApplication.Controllers
             return View(postsOnPage);
         }
 
-        public List<Post> GetPostsFromDB() => db.Posts.Include(p => p.LikedUsers).Include(p => p.Comments).ToList();
+        public List<Post> GetPostsFromDB() => db.Posts.Include(p => p.User).Include(p => p.LikedUsers).Include(p => p.Comments).ToList();
 
         public List<Post> GetPostsOnPage(int page, Func<Post, object> keySelector, List<Post> posts)
         {
@@ -89,8 +89,6 @@ namespace TestWebApplication.Controllers
 
             if (post == null)
                 return new EmptyResult();
-
-            post.Views++;
 
             Comment comment = new Comment
             {

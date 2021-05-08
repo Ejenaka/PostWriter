@@ -4,7 +4,8 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - приложение ASP.NET</title>
+    <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon"/>
+    <title>@ViewBag.Title</title>
     @Styles.Render("~/Content/css")
     @Styles.Render("~/Content/summernote.min.css")
     @Scripts.Render("~/bundles/modernizr")
@@ -19,7 +20,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                @Html.ActionLink("Blog App Test", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+                @Html.ActionLink("Post Writer", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
@@ -30,6 +31,7 @@
                     @if (Session["Username"] != null)
                      {
                         <li>@Html.ActionLink(Session["Username"].ToString(), "Details", "Users", new { id = Session["UserID"]}, new { })</li>
+                        <li>@Html.ActionLink("Log out", "LogOut", "Home")</li>
                      }
                      else
                      {
@@ -45,7 +47,7 @@
         @RenderBody()
         <hr />
         <footer>
-            <p>&copy; @DateTime.Now.Year - мое приложение ASP.NET</p>
+            <p>&copy; @DateTime.Now.Year - Post Writer</p>
         </footer>
     </div>
 

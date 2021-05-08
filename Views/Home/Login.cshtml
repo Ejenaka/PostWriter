@@ -1,19 +1,17 @@
 ﻿@model TestWebApplication.Models.User
 
 @{
-    ViewBag.Title = "Login";
+    ViewBag.Title = "Log in";
 }
 
-<h2>Login</h2>
-
+<h2>Log in</h2>
+<hr />
 
 @using (Html.BeginForm()) 
 {
     @Html.AntiForgeryToken()
     
     <div class="form-horizontal">
-        <h4>User</h4>
-        <hr />
         <div class="form-group">
             @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
@@ -39,7 +37,7 @@
 }
 
 <div>
-    @Html.ActionLink("Back to List", "Index")
+    @Html.ActionLink("Back to Home", "Index")
 </div>
 
 @section Scripts {

@@ -5,27 +5,27 @@
 }
 
 <ul class="posts__tabs nav nav-tabs">
-    <li class="active">
+    <li id="recent">
         <a href="/Posts/Index">
             Recent
             <span class="glyphicon glyphicon-time"></span>
         </a>
     </li>
 
-    <li>
+    <li id="mostLiked">
         <a href="/Posts/MostLiked">
             Most Liked
             <span class="glyphicon glyphicon-thumbs-up"></span>
         </a>
     </li>
 
-    <li>
+    <li id="mostCommented">
         <a href="/Posts/MostCommented">
             Most Commented
             <span class="glyphicon glyphicon-comment"></span>
         </a>
     </li>
-    
+
     <li>
         <form action="/Posts/Search" class="navbar-form">
             <div class="input-group">
@@ -40,41 +40,79 @@
     </li>
 </ul>
 
-@foreach (var item in Model)
+@if (Model.Any())
 {
-    <div class="post">
-        
-        <h1>@item.Title</h1>
-        <h4>
-            <small>
-                @Html.ActionLink(item.User.Name, "Users", "Details", new { id = item.AuthorID }),
-                @item.PublicationDate.ToString("dddd, dd MMMM yyyy")
-            </small>
-        </h4>
-        <p><i>@item.Themes</i></p>
-        <div>@Html.Raw(item.FrontContent)</div>
-        @Html.ActionLink("Read more", "Details", "Posts", new { id = item.ID }, new { @class = "btn btn-primary" })
-        <div class="post__info well well-sm">
-            <div class="info__item">
-                <span class="glyphicon glyphicon-thumbs-up"></span>
-                <p>@item.Likes</p>
+    foreach (var item in Model)
+    {
+        <div class="post">
+
+            <h1>@item.Title</h1>
+            <h4>
+                <small>
+                    @Html.ActionLink(item.User.Name, "Users", "Details", new { id = item.AuthorID }),
+                    @item.PublicationDate.ToString("dddd, dd MMMM yyyy")
+                </small>
+            </h4>
+            <p><i>@item.Themes</i></p>
+            <div>@Html.Raw(item.FrontContent)</div>
+            @Html.ActionLink("Read more", "Details", "Posts", new { id = item.ID }, new { @class = "btn btn-primary" })
+            <div class="post__info well well-sm">
+                <div class="info__item">
+                    <span class="glyphicon glyphicon-thumbs-up"></span>
+                    <p>@item.Likes</p>
+                </div>
+                <div class="info__item">
+                    <span class="glyphicon glyphicon-comment"></span>
+                    <p>@item.Comments.Count</p>
+                </div>
             </div>
-            <div class="info__item">
-                <span class="glyphicon glyphicon-comment"></span>
-                <p>@item.Comments.Count</p>
-            </div>
+            <hr />
         </div>
-        <hr />
-    </div>
+    }
 }
+else
+{
+    <h1>There is no posts yet</h1>
+}
+
 
 <div class="pages">
     <div class="btn-group" role="group">
         @for (int i = 1; i <= (int)ViewData["PagesCount"]; i++)
         {
-            @Html.ActionLink(i.ToString(), ViewData["FilterAction"].ToString(), 
-                new { page = i, name = ViewData["SearchPostName"]}, new { @class="btn btn-default" })
+            @Html.ActionLink(i.ToString(), ViewData["FilterAction"].ToString(),
+                new { page = i, name = ViewData["SearchPostName"] }, new { @class = "btn btn-default" })
         }
     </div>
 </div>
 
+<script type="text/javascript">
+    const recentTab = document.getElementById('recent');
+    const mostLikedTab = document.getElementById('mostLiked');
+    const mostCommentedTab = document.getElementById('mostCommented');
+    const tabs = [recentTab, mostLikedTab, mostCommentedTab];
+
+    const currentLocation = window.location.href.toString();
+    const action = currentLocation.split('/').pop();
+
+    switch (action) {
+        case 'Index':
+            removeOthersActiveStyle(recentTab, tabs);
+            break;
+        case 'MostLiked':
+            removeOthersActiveStyle(mostLikedTab, tabs);
+            break;
+        case 'MostCommented':
+            removeOthersActiveStyle(mostCommentedTab, tabs);
+            break;
+
+        default:
+            tabs.forEach(e => e.classList.remove('active'));
+    }
+
+    function removeOthersActiveStyle(activeElement, ...others) {
+        others.forEach(e => e.classList?.remove('active'));
+        activeElement.classList.add('active');
+    }
+
+</script>
