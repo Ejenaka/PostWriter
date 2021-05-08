@@ -96,7 +96,9 @@ else
     const action = currentLocation.split('/').pop();
 
     switch (action) {
+        case 'Posts':
         case 'Index':
+        case '':
             removeOthersActiveStyle(recentTab, tabs);
             break;
         case 'MostLiked':

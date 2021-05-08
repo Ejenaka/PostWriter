@@ -116,6 +116,7 @@ namespace TestWebApplication.Controllers
             if (ModelState.IsValid)
             {
                 User currentUser = db.Users.Find((int)Session["UserID"]);
+                currentUser.BlogsCount++;
                 post.AuthorID = currentUser.ID;
                 post.PublicationDate = DateTime.Now;
 
