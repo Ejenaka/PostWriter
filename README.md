@@ -1,5 +1,5 @@
-# PostWriter
-## An ASP.NET MVC application, that allows you publish your own posts.
+# Post Writer
+## An ASP.NET MVC application, that allows you to publish your own posts.
 
 View of the **main** page:
 ![Image of the application](https://i.ibb.co/mTzRfmQ/postwriter.png)
