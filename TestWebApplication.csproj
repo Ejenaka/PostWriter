@@ -256,6 +256,7 @@
     <Content Include="Content\summernote.min.css" />
     <Content Include="Scripts\summernote.min.js" />
     <Content Include="Scripts\summernote.min.js.LICENSE.txt" />
+    <Content Include="SomeFile.txt" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
