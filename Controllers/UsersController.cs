@@ -16,6 +16,8 @@ namespace TestWebApplication.Controllers
 
         public ActionResult Details(int? id)
         {
+            return null;
+        
             if (id == null)
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
